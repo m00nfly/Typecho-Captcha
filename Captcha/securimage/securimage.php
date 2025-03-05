@@ -935,7 +935,7 @@ class Securimage
         }
 
         for($i = 0; $i < strlen($code); ++$i) {
-            $letters[] = $code{$i};
+            $letters[] = $code[$i];
         }
         
         if ($format == 'mp3') {
@@ -981,7 +981,7 @@ class Securimage
         $code = '';
 
         for($i = 1, $cslen = strlen($this->charset); $i <= $this->code_length; ++$i) {
-            $code .= $this->charset{rand(0, $cslen - 1)};
+            $code .= $this->charset[rand(0, $cslen - 1)];
         }
         
         //return 'testing';  // debug, set the code to given string
@@ -1287,7 +1287,7 @@ class Securimage
         $step    = 1;
         
         for ($i = $start; $i < $datalen; $i += $step) {
-            $ch = ord($data{$i});
+            $ch = ord($data[$i]);
             if ($ch == 0 || $ch == 255) continue;
             
             if ($ch < 16 || $ch > 239) {
@@ -1298,7 +1298,7 @@ class Securimage
             
             if ($ch < 0) $ch = 0; else if ($ch > 255) $ch = 255;
 
-            $data{$i} = chr($ch);
+            $data[$i] = chr($ch);
             
             $step = rand(1,4);
         }

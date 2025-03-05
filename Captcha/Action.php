@@ -44,6 +44,9 @@ class Captcha_Action extends Typecho_Widget implements Widget_Interface_Do
         //验证码颜色
         $img->text_color = new Securimage_Color($options->plugin('Captcha')->text_color);
 
+	//验证码位数
+	$img->code_length = $options->plugin('Captcha')->code_length;
+
         //自定义验证码
         $img->use_wordlist = $options->plugin('Captcha')->use_wordlist;
         $img->wordlist = explode("\n", $options->plugin('Captcha')->wordlist);

@@ -91,6 +91,10 @@ class Captcha_Plugin implements Typecho_Plugin_Interface
         'stxingkai.ttf', '验证码字体', '如果使用中文验证码，请务必选择中文字体文件，否则无法演示验证码');
         $form->addInput($ttf_file);
 
+	$code_length = new Typecho_Widget_Helper_Form_Element_Text('code_length', NULL, '6',
+        _t('验证码位数'), _t('最小值为1，默认为6，过大无法完整显示，仅对字母验证码有效'));
+        $form->addInput($code_length);
+
 
         $image_signature = new Typecho_Widget_Helper_Form_Element_Text('image_signature', NULL, 'ccvita.com',
         _t('签名内容'));
@@ -129,9 +133,23 @@ class Captcha_Plugin implements Typecho_Plugin_Interface
     
     public static function output()
     {
-        echo '<img src="' . Typecho_Common::url('/action/captcha', Helper::options()->index) 
-        . '" alt="captcha" onclick="this.src = this.src + \'?\' + Math.random()" style="cursor: pointer" title="' . _t('点击图片刷新验证码') . '" /><br />'
-        . '<input type="text" class="captcha" name="captcha_code" /> <strong>' . _t('请输入验证码') . '</strong>';
+	    echo '<div id="captcha" class="row row-sm">'
+   . '<div class="form-group col-sm-6 col-md-4">'
+   . '<label>验证码 <span class="required text-danger">*</span></label>'
+   . '<div><input type="text" class="form-control" name="captcha_code" maxlength="6" placeholder="图片上6个字母">'
+   . '<a class="item-thumb-small lazy"><img src="' . Typecho_Common::url('/action/captcha', Helper::options()->index)
+   . '" alt="captcha" onclick="this.src = this.src + \'?\' + Math.random()" style="cursor: pointer" title="点击图片刷新验证码"></a>'
+   . '</div></div></div>';
+
+//        echo '<div class="form-group"><strong>' . _t('请输入验证码') . '</strong><br><input type="text" class="captcha" name="captcha_code" placeholder="图片上6个字母"/><br>'
+//	. '<a class="item-thumb-small lazy">'
+//	. '<img src="' . Typecho_Common::url('/action/captcha', Helper::options()->index) 
+//        . '" alt="captcha" onclick="this.src = this.src + \'?\' + Math.random()" style="cursor: pointer" title="' . _t('点击图片刷新验证码') . '" /></a></div>';
+
+//          echo '为防止恶意评论，评论前请输入下面图形中的两位英数字<br><a class="item-thumb-small lazy"><img id="captchapic" src="' . Typecho_Common::url('/action/captcha', Helper::options()->index)
+//	  . '" title="' . _t('请点击按钮刷新验证码，点击图片刷新无效') . '" /></a>'
+//	  . '<input type="text" class="captcha" name="captcha" />  '
+//	  . '<input id="btnUpdCaptcha" type="button" onclick="document.getElementById(\'captchapic\').src = document.getElementById(\'captchapic\').src + \'?\' + Math.random()" value="刷新验证码"></input>';
     }
     
     /**
