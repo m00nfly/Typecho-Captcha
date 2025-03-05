@@ -4,7 +4,7 @@
  * 验证码插件是基于<a href="http://www.phpcaptcha.org">securimage</a>开发的.
  * 
  * @package Typecho Captcha
- * @author qining & Kimi
+ * @author qining & Kimi & m00nfly
  * @version 1.0.0
  * @link http://typecho.org
  */
@@ -133,23 +133,14 @@ class Captcha_Plugin implements Typecho_Plugin_Interface
     
     public static function output()
     {
+        /** 修改如下 html 可自定义验证码和输入框的样式 **/
 	    echo '<div id="captcha" class="row row-sm">'
-   . '<div class="form-group col-sm-6 col-md-4">'
-   . '<label>验证码 <span class="required text-danger">*</span></label>'
-   . '<div><input type="text" class="form-control" name="captcha_code" maxlength="6" placeholder="图片上6个字母">'
-   . '<a class="item-thumb-small lazy"><img src="' . Typecho_Common::url('/action/captcha', Helper::options()->index)
-   . '" alt="captcha" onclick="this.src = this.src + \'?\' + Math.random()" style="cursor: pointer" title="点击图片刷新验证码"></a>'
-   . '</div></div></div>';
-
-//        echo '<div class="form-group"><strong>' . _t('请输入验证码') . '</strong><br><input type="text" class="captcha" name="captcha_code" placeholder="图片上6个字母"/><br>'
-//	. '<a class="item-thumb-small lazy">'
-//	. '<img src="' . Typecho_Common::url('/action/captcha', Helper::options()->index) 
-//        . '" alt="captcha" onclick="this.src = this.src + \'?\' + Math.random()" style="cursor: pointer" title="' . _t('点击图片刷新验证码') . '" /></a></div>';
-
-//          echo '为防止恶意评论，评论前请输入下面图形中的两位英数字<br><a class="item-thumb-small lazy"><img id="captchapic" src="' . Typecho_Common::url('/action/captcha', Helper::options()->index)
-//	  . '" title="' . _t('请点击按钮刷新验证码，点击图片刷新无效') . '" /></a>'
-//	  . '<input type="text" class="captcha" name="captcha" />  '
-//	  . '<input id="btnUpdCaptcha" type="button" onclick="document.getElementById(\'captchapic\').src = document.getElementById(\'captchapic\').src + \'?\' + Math.random()" value="刷新验证码"></input>';
+           . '<div class="form-group col-sm-6 col-md-4">'
+           . '<label>验证码 <span class="required text-danger">*</span></label>'
+           . '<div><input type="text" class="form-control" name="captcha_code" maxlength="6" placeholder="图片上6个字母">'
+           . '<a class="item-thumb-small lazy"><img src="' . Typecho_Common::url('/action/captcha', Helper::options()->index)
+           . '" alt="captcha" onclick="this.src = this.src + \'?\' + Math.random()" style="cursor: pointer" title="点击图片刷新验证码"></a>'
+           . '</div></div></div>';
     }
     
     /**
