@@ -91,10 +91,9 @@ class Captcha_Plugin implements Typecho_Plugin_Interface
         'stxingkai.ttf', '验证码字体', '如果使用中文验证码，请务必选择中文字体文件，否则无法演示验证码');
         $form->addInput($ttf_file);
 
-	$code_length = new Typecho_Widget_Helper_Form_Element_Text('code_length', NULL, '6',
+	    $code_length = new Typecho_Widget_Helper_Form_Element_Text('code_length', NULL, '6',
         _t('验证码位数'), _t('最小值为1，默认为6，过大无法完整显示，仅对字母验证码有效'));
         $form->addInput($code_length);
-
 
         $image_signature = new Typecho_Widget_Helper_Form_Element_Text('image_signature', NULL, 'ccvita.com',
         _t('签名内容'));
@@ -118,8 +117,26 @@ class Captcha_Plugin implements Typecho_Plugin_Interface
 
         $wordlist = new Typecho_Widget_Helper_Form_Element_Textarea('wordlist', NULL, "中文\n验证码",
         _t('验证码文本'), _t('自定义验证码内容，每行一个<br><img src="' . Typecho_Common::url('/action/captcha', Helper::options()->index) 
-        . '" alt="captcha" onclick="this.src = this.src + \'?\' + Math.random()" style="cursor: pointer" title="' . _t('点击图片刷新验证码') . '" />'));
+        . '" alt="captcha" onclick="this.src = this.src + \'?\' + Math.random()" style="cursor: pointer" title="' . _t('点击图片刷新验证码') . '" /><hr>'));
         $form->addInput($wordlist);
+
+        //是否启用Server酱通知
+        $enable_ServerChain = new Typecho_Widget_Helper_Form_Element_Radio('enable_ServerChain',
+                array('1' => '启用',
+                '0' => '不启用'),
+                0, 'Server酱 推送', _t('是否启用 <a href="https://sc3.ft07.com/">Server酱<sup>3</sup></a> (APP推送) 或 <a href="https://sct.ftqq.com/forward">Server酱<sup>Turbo</sup></a> (微信推送) 评论通知<br>
+需要先注册并获取有效的 SendKey 或 SCKEY 才能进行设定。'));
+        $form->addInput($enable_ServerChain);
+
+        //设置 SendKey
+        $sendKey = new Typecho_Widget_Helper_Form_Element_Text('sendKey', NULL, '',
+                _t('SendKey'), _t('填写注册获取到的有效 Server酱 SendKey'));
+        $form->addInput($sendKey);
+
+        //设置消息分类 Tags
+        $msgTags = new Typecho_Widget_Helper_Form_Element_Text('msgTags', NULL, 'Typecho评论',
+                        _t('推送标签 Tags'), _t('设置消息推送的分类标签，仅对 Server酱<sup>3</sup> 有效，默认为 "Typecho评论" 多个标签使用 | 竖线分割'));
+        $form->addInput($msgTags);
     }
     
     /**
@@ -166,13 +183,20 @@ class Captcha_Plugin implements Typecho_Plugin_Interface
         if (!$img->check($captchaCode)) {
             throw new Typecho_Widget_Exception(_t('验证码错误, 请重新输入'));
         }
-    
+
+        // 处理Server酱消息推送
+        $options = Typecho_Widget::widget('Widget_Options');
+        if ($options->plugin('Captcha')->enable_ServerChain) {
+            $sckey = $options->plugin('Captcha')->sendKey;
+            $msgTags = $options->plugin('Captcha')->msgTags;
+            $text = "主人，您的博客收到了新的评论，请注意查看哦！";
+            $desp = "**".$comment['author']."** 在 [「".$post->title."」](".$post->permalink." \"".$post->title."\") 中说到: \n\n > ".$comment['text'];
+            $result = sc_send($text, $desp, $sckey,$msgTags);
+        }
+
         return $comment;
     }
 }
-
-
-
 
 function getDirlist($dirPath) {
 	$fileList = array();
@@ -187,4 +211,36 @@ function getDirlist($dirPath) {
 	}
 
 	return $fileList;
+}
+
+/**
+ * Server酱推送方法
+ *
+ * @param $text 消息内容
+ * @param $desp 消息说明
+ * @param $key Server酱SendKey
+ * @return false|string
+ */
+function sc_send($text = '', $desp = '', $key = '[SENDKEY]', $tags = '')
+{
+    // 判断 $key 是否以 'sctp' 开头，并根据匹配到的数字部分拼接相应的 URL
+    if (strpos($key, 'sctp') === 0) {
+        // 使用正则表达式提取 sctp 开头后面的数字
+        preg_match('/^sctp(\d+)t/', $key, $matches);
+        $num = $matches[1];
+        $url = "https://{$num}.push.ft07.com/send/{$key}.send";
+        $postdata = http_build_query(array( 'text' => $text, 'desp' => $desp, 'tags' => $tags));
+    } else {
+        $url = "https://sctapi.ftqq.com/{$key}.send";
+        $postdata = http_build_query(array( 'text' => $text, 'desp' => $desp, 'noip' => 1));
+    }
+
+    $opts = array('http' =>
+    array(
+        'method'  => 'POST',
+        'header'  => 'Content-type: application/x-www-form-urlencoded',
+        'content' => $postdata));
+
+    $context  = stream_context_create($opts);
+    return file_get_contents($url, false, $context);
 }
